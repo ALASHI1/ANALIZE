@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analize</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Analize</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto"> <!-- Added ml-auto to align items to the right -->
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account_signup' %}">Sign Up</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+    </header>
+
+    <main class="container mt-4">
+        <!-- Most Active Stocks Gallery -->
+        <section class="most-active-stocks mb-4">
+            <h2>Most Active Stocks</h2>
+            <div class="row">
+                {% for stock in data.most_active %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ stock.Name }}</h5>
+                            <p class="card-text">Symbol: {{ stock.Symbol }}</p>
+                            <p class="card-text">Price: ${{ stock.Price }}</p>
+                            <p class="card-text">Change: {{ stock.Change }}%</p>
+                            <div class="stock-status">
+                                {% if stock.Change > 0 %}
+                                    <span class="badge badge-success">Gaining</span>
+                                {% elif stock.Change < 0 %}
+                                    <span class="badge badge-danger">Losing</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Neutral</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Top Gainers Gallery -->
+        <section class="gainers mb-4">
+            <h2>Top Gainers</h2>
+            <div class="row">
+                {% for stock in data.gainers %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ stock.Name }}</h5>
+                            <p class="card-text">Symbol: {{ stock.Symbol }}</p>
+                            <p class="card-text">Price: ${{ stock.Price  }}</p>
+                            <p class="card-text">Change: {{ stock.Change }}% </p>
+                            <div class="stock-status">
+                                {% if stock.Change > 0 %}
+                                    <span class="badge badge-success">Gaining</span>
+                                {% elif stock.Change < 0 %}
+                                    <span class="badge badge-danger">Losing</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Neutral</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Top Losers Gallery -->
+        <section class="losers mb-4">
+            <h2>Top Losers</h2>
+            <div class="row">
+                {% for stock in data.losers %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ stock.Name }}</h5>
+                            <p class="card-text">Symbol: {{ stock.Symbol }}</p>
+                            <p class="card-text">Price: ${{ stock.Price  }}</p>
+                            <p class="card-text">Change: {{ stock.Change }}% </p>
+                            <div class="stock-status">
+                                {% if stock.Change > 0 %}
+                                    <span class="badge badge-success">Gaining</span>
+                                {% elif stock.Change < 0 %}
+                                    <span class="badge badge-danger">Losing</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Neutral</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-light text-center py-3">
+        <p>&copy; {{ current_year }} Real-Time Stock Market Analysis Tool. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        const socket = new WebSocket('ws://' + window.location.host + '/ws/stocks/');
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            updateStockCards(data);
+        };
+
+        function updateStockCards(data) {
+            const container = document.getElementById('stock-cards-container');
+            container.innerHTML = '';  // Clear existing cards
+
+            Object.keys(data).forEach(category => {
+                data[category].forEach(stock => {
+                    const cardHTML = `
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">${stock.Symbol}</h5>
+                                    <p class="card-text">${stock.Name}</p>
+                                    <p class="card-text">Price: $${stock.Price}</p>
+                                    <p class="card-text">% Change: ${stock.Percent Change}%</p>
+                                    <p class="card-text" style="color: ${stock.Percent Change < 0 ? 'red' : 'green'};">
+                                        ${stock.Change < 0 ? 'Loss' : 'Gain'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += cardHTML;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
