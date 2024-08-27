@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Trend</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="text-center">Overall Market Trend - Last Week</h2>
+    <canvas id="marketTrendChart"></canvas>
+</div>
+
+<script>
+    var ctx = document.getElementById('marketTrendChart').getContext('2d');
+    var marketTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ dates|safe }},
+            datasets: [{
+                label: 'Average Percentage Change',
+                data: {{ average_changes|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                fill: true
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

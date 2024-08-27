@@ -48,8 +48,3 @@ def get_stock_sentiment(request, symbol):
     text = [str(article['description']) for article in articles]
     sentiment = analyze_articles(articles)
     return JsonResponse({'symbol': symbol, 'sentiment': sentiment})
-
-
-#aws credentials
-#aws access key id = AKIAU6GDZWRM2BKRP5JA
-#aws secret = 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

@@ -38,3 +38,9 @@ dump.rdb
 .env/
 venv/
 ../.history
+__pycache__/
+*.pyc
+../__pycache__/
+../*.pyc
+../*.pyc/
+

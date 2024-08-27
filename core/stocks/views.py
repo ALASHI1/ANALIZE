@@ -5,21 +5,33 @@ from requests_html import HTMLSession
 from yahoo_fin import stock_info as si
 from .models import Tickers
 from .forms import TickerListForm
+from polygon import RESTClient
+import requests
+import json
+
+
+def get_jsonparsed_data(url):
+    response = requests.get(url)
+    response.raise_for_status()  # Raises an HTTPError if the HTTP request returned an unsuccessful status code
+    return response.json()
+
+
+
 
 def get_popular_stocks(request):
-    session = HTMLSession()
-    most_active = si.get_day_most_active()
-    gainers = si.get_day_gainers()
-    losers = si.get_day_losers()
-    
-    data = {
-    "most_active": most_active.to_dict('records')[:5],
-    "gainers": gainers.to_dict('records')[:5],
-    "losers": losers.to_dict('records')[:5],
-}
+    gainers = get_gainers(request)
+    losers = get_losers(request)
+    return render(request, 'accounts/test.html', {'gainers': gainers, 'losers': losers})
 
+def get_losers(request):
+    url = "https://financialmodelingprep.com/api/v3/stock_market/losers?apikey=4VuOIgUpZwTIKepS5Ac6JcrZB3mlLVuA"
+    data = get_jsonparsed_data(url)
+    return data
 
-    return JsonResponse(data)
+def get_gainers(request):
+    url = "https://financialmodelingprep.com/api/v3/stock_market/gainers?apikey=4VuOIgUpZwTIKepS5Ac6JcrZB3mlLVuA"
+    data = get_jsonparsed_data(url)
+    return data
 
 def get_stock_data(request, symbol):
     data = get_realtime_data(symbol)
